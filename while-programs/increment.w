@@ -1,9 +1,8 @@
-int test()
-{
-    int x; 
-    int y;
+test() {
+    x = 0; 
+    y = 1;
 
-	int count = 0;
+    count = 0;
 	while (count < 1000)
 	{
 		x = x + 1;
