@@ -1,7 +1,12 @@
 import copy
+from . import ast_utils
 import whiletranspiler.transpiler.ast as ast_module
 
 def create_rw_sets(ast, variable_mapping):
+    """
+    Adds attributes `read_edges` and `write_edges` to all nodes in AST.
+    """
+
     ast.read_edges = set()
     ast.write_edges = set()
 
@@ -26,7 +31,7 @@ def create_rw_sets(ast, variable_mapping):
 
         for reads_from in reads:
             prev_nodes, depends_on = (
-                    variable_mapping.get(reads_from, (set(), None)))
+                    variable_mapping.get(reads_from, (set(), set())))
 
             ast.read_edges |= prev_nodes
             dependencies |= depends_on
@@ -158,19 +163,48 @@ def create_rw_sets(ast, variable_mapping):
         return set(), set()
 
     else:
-        print(ast)
         print("ERROR >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
         raise ValueError
 
-def analyze_ast(ast):
+def serialize_ast_graph(ast):
+    """
+    Returns a serialized JSON representation of the graph of read and write
+    edges for the top level of the AST.
+    """
+
+    nodes = []
+    node_mapping = {} # map node to index in nodes list
+
+    if not isinstance(ast, ast_module.AST.SEQUENCE):
+        return nodes
+
+    for node in ast.statements:
+        if isinstance(node, ast_module.AST.COMMENT):
+            continue
+
+        node_mapping[node] = len(nodes)
+
+        nodes.append({
+            "label": ast_utils.str_label(node),
+            "read_edges": [node_mapping[x] for x in node.read_edges],
+            "write_edges": [node_mapping[x] for x in node.write_edges],
+        })
+
+    return nodes
+
+def analyze_ast(emit, ast):
+
+    if ast is None:
+        emit("plugin_analysisgraph", { "error": True }),
+        return
 
     # create a deep copy so we can play around with it
     ast = copy.deepcopy(ast)
 
-    ast.print()
-    result = create_rw_sets(ast, {})
+    create_rw_sets(ast, {})
 
-    import pickle
-    with open("test.out", "wb") as fb:
-        pickle.dump(ast, fb)
+    emit("plugin_analysisgraph", {
+        "error": False,
+        "graph": serialize_ast_graph(ast)
+    }),
 
