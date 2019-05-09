@@ -30,6 +30,10 @@
     box-sizing: content-box;
 }
 
+.analysis-graph-edge.inactive {
+    opacity: 0.3;
+}
+
 .analysis-graph-edge.left-edge {
     right: 50%;
     border-right-width: 0px;

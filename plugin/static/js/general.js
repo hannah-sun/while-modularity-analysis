@@ -47,6 +47,8 @@ function while_plugin(socket) {
           '<div class="' + edge_settings[side].cls + '"></div>'
         );
 
+        $edge.addClass("edge-connected-" + i).addClass("edge-connected-" + j);
+
 
         const padding = ((edge_settings[side].cnt % graph_padding_range + 1) *
             (graph_padding_delta / graph_padding_range));
@@ -66,7 +68,7 @@ function while_plugin(socket) {
         var node = graph[i];
         var $elem = $(
           '<div class="analysis-graph-node-container">' +
-            '<div class="analysis-graph-node">' +
+            '<div class="analysis-graph-node" nodeid="' + i + '">' +
               node.label +
             '</div>' +
           '</div>'
@@ -85,6 +87,18 @@ function while_plugin(socket) {
             draw_edge(node.read_edges[j], i, "right");
           }
         }
+
+        $elem.find(".analysis-graph-node")
+          .mouseenter(function() {
+            $content.find(".analysis-graph-edge")
+                .toggleClass("inactive", true);
+            $content.find(".edge-connected-" + this.getAttribute("nodeid"))
+                .toggleClass("inactive", false);
+          })
+          .mouseleave(function() {
+            $content
+                .find(".analysis-graph-edge").toggleClass("inactive", false);
+          });
       }
     }
 
