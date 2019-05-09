@@ -2,6 +2,7 @@
     font-size: 0px;
     margin: 25px 0px;
     text-align: center;
+    position: relative;
 }
 
 .analysis-graph-node {
@@ -28,10 +29,11 @@
     position: absolute;
     z-index: -1;
     box-sizing: content-box;
+    transition: opacity 0.2s;
 }
 
 .analysis-graph-edge.inactive {
-    opacity: 0.3;
+    opacity: 0.15;
 }
 
 .analysis-graph-edge.left-edge {
@@ -45,3 +47,46 @@
     border-left-width: 0px;
     border-radius: 0px 50% 50% 0px;
 }
+
+#plugin-tab-content-graph.hide-left-edges .left-edge {
+    opacity: 0;
+}
+
+#plugin-tab-content-graph.hide-right-edges .right-edge {
+    opacity: 0;
+}
+
+#plugin-graph-settings {
+    padding: 5px 15px;
+    position: absolute;
+    width: 100%;
+    height: 85px;
+    bottom: 0px;
+    box-sizing: border-box;
+    background: #ffffff;
+    border-top: 1px solid #cccccc;
+    z-index: 2;
+}
+
+#plugin-graph-settings .switch {
+    margin: 10px 0px;
+}
+
+#plugin-graph-settings .switch .switch-label {
+    display: inline-block;
+    width: 140px;
+}
+
+#plugin-graph-settings .switch label .lever {
+    margin-top: -5px;
+}
+
+#plugin-tab-content-graph {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 85px;
+    overflow: auto;
+}
+

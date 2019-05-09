@@ -6,9 +6,28 @@ $(function() {
    * 50 is the minimum padding to the side of the tab window */
   graph_padding_delta = Math.min(
       $("#plugin-graph-tab").width() / 2 - 150 - 50, graph_padding_delta);
+
+  function toggle_write() {
+    $("#plugin-tab-content-graph").toggleClass("hide-left-edges",
+        !$("#plugin-toggle-write-edges").prop("checked"))
+  }
+  toggle_write();
+  $("#plugin-toggle-write-edges").on("input", toggle_write);
+
+  function toggle_read() {
+    $("#plugin-tab-content-graph").toggleClass("hide-right-edges",
+        !$("#plugin-toggle-read-edges").prop("checked"))
+  }
+  toggle_read();
+  $("#plugin-toggle-read-edges").on("input", toggle_read);
 });
 
 function while_plugin(socket) {
+
+  socket.on("testblah", function(data) {
+    console.log(data);
+  });
+
   socket.on("plugin_analysisgraph", function(data) {
     const $tab = $("#plugin-graph-tab");
 
@@ -19,7 +38,7 @@ function while_plugin(socket) {
     $tab.find(".tab-body").removeClass("staging");
 
     if (!data.error) {
-      const $content = $tab.find(".plugin-tab-content");
+      const $content = $tab.find("#plugin-tab-content-graph");
       $content.empty();
 
       var nodes = [];
