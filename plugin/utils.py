@@ -52,3 +52,15 @@ class JoinableSet:
 
     def __iter__(self):
         return iter(self.data._set)
+
+def _index_in_range(index, _range):
+    return _range[0] <= index <= _range[1]
+
+def range_intersects(range1, range2):
+    return (
+        _index_in_range(range1[0], range2) or
+        _index_in_range(range1[1], range2) or
+        _index_in_range(range2[0], range1) or
+        _index_in_range(range2[1], range1)
+    )
+

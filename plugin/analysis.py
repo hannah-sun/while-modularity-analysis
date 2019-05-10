@@ -223,6 +223,10 @@ class Snippet(utils.JoinableSet):
             max(self_maximum, maximum),
         )
 
+    @property
+    def index_range(self):
+        return self.data.index_range
+
 def find_snippets(ast):
     """
     Returns list of snippets.
@@ -265,6 +269,16 @@ def find_snippets(ast):
             snippets.append(snippet)
 
     snippets = list(set(snippets))
+
+    for i in range(len(snippets)):
+        for j in range(i + 1, len(snippets)):
+            x = snippets[i]
+            y = snippets[j]
+            if utils.range_intersects(x.index_range, y.index_range):
+                x.join(y)
+
+    snippets = list(set(snippets))
+
     snippets_result = [
         [node_mapping[x] for x in snippet] for snippet in snippets]
 
