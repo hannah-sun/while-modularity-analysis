@@ -158,7 +158,7 @@ function while_plugin(socket) {
     $tab.find(".tab-body").removeClass("staging");
 
     if (!data.error) {
-      const $content = $tab.find("#plugin-tab-content-graph");
+      const $content = $tab.find("#plugin-tab-content-graph .body");
       $content.empty();
 
       var nodes = [];

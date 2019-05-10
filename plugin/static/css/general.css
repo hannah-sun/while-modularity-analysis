@@ -134,3 +134,14 @@
     overflow: auto;
 }
 
+#plugin-tab-content-graph > .header {
+    margin-top: 15px;
+    margin-left: 0px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#plugin-tab-content-graph > .header {
+    text-align: center;
+}
+
