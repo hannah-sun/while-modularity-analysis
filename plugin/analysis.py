@@ -169,7 +169,7 @@ def create_rw_sets(ast, variable_mapping):
         print("ERROR >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
         raise ValueError
 
-def serialize_ast_graph(ast):
+def serialize_ast_graph(ast, entire_code):
     """
     Returns a serialized JSON representation of the graph of read and write
     edges for the top level of the AST.
@@ -188,7 +188,8 @@ def serialize_ast_graph(ast):
         node_mapping[node] = len(nodes)
 
         nodes.append({
-            "label": utils.str_label(node, single_line=True),
+            "label": utils.str_label(
+                    node, single_line=True, entire_code=entire_code),
             "read_edges": [node_mapping[x] for x in node.read_edges],
             "write_edges": [node_mapping[x] for x in node.write_edges],
         })
@@ -288,7 +289,7 @@ def find_snippets(ast):
 
     return snippets_result
 
-def serialize_snippets_data(ast, snippets):
+def serialize_snippets_data(ast, snippets, entire_code):
     """
     Returns a serialized JSON representation of the snippet data.
     """
@@ -299,14 +300,15 @@ def serialize_snippets_data(ast, snippets):
         if _skip_node(node):
             nodes.append(None)
         else:
-            nodes.append(utils.str_label(node, single_line=False))
+            nodes.append(utils.str_label(
+                    node, single_line=False, entire_code=entire_code))
 
     return {
         "nodes": nodes,
         "snippets": snippets
     }
 
-def analyze_ast(emit, ast):
+def analyze_ast(emit, ast, entire_code=None):
 
     if ast is None:
         emit("plugin_analysisgraph", { "error": True }),
@@ -320,13 +322,13 @@ def analyze_ast(emit, ast):
 
     emit("plugin_analysisgraph", {
         "error": False,
-        "graph": serialize_ast_graph(ast)
+        "graph": serialize_ast_graph(ast, entire_code)
     })
 
     snippets = find_snippets(ast)
 
     emit("plugin_analysissnippets", {
         "error": False,
-        "snippet_data": serialize_snippets_data(ast, snippets),
+        "snippet_data": serialize_snippets_data(ast, snippets, entire_code),
     })
 

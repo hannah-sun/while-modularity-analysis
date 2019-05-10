@@ -3,7 +3,7 @@ import whiletranspiler.transpiler as transpiler
 
 multiple_spaces_pattern = re.compile("[ ]+")
 
-def str_label(ast, single_line=False):
+def str_label(ast, single_line=False, entire_code=None):
     """
     Returns a human readable string representing the AST.
     """
@@ -11,7 +11,10 @@ def str_label(ast, single_line=False):
     if ast is None:
         return ""
 
-    string = transpiler.transpile_c.transpile_ast_to_string(ast)
+    if entire_code is None:
+        string = transpiler.transpile_c.transpile_ast_to_string(ast)
+    else:
+        string = entire_code[ast.char_range[0] - 1 : ast.char_range[1]]
 
     if single_line:
         return (multiple_spaces_pattern
