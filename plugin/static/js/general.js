@@ -80,15 +80,33 @@ function while_plugin(socket) {
 
         var $elem = $(
           '<div class="snippet-container">' +
-            '<div class="snippet-node" nodeid="' + i + '">' +
+            '<div class="snippet-node">' +
               node +
             '</div>' +
           '</div>'
         );
+
+        var $snippet_node = $elem.find(".snippet-node");
+
+        $snippet_node
+          .mouseenter(function() {
+            var snippetgroup = this.getAttribute("snippetgroup");
+            if (snippetgroup !== null) {
+              $content.find(".snippet-container")
+                  .toggleClass("inactive", true);
+              $content.find(".snippet-group-" + snippetgroup)
+                  .toggleClass("inactive", false);
+            }
+          })
+          .mouseleave(function() {
+            $content.find(".snippet-container")
+              .toggleClass("inactive", false);
+          });
+
         $content.append($elem);
         node_elems.push({
           container: $elem,
-          node: $elem.find(".snippet-node"),
+          node: $snippet_node,
         });
       }
 
@@ -103,7 +121,12 @@ function while_plugin(socket) {
         })
         for (var j = 0; j < snippet.length; j++) {
           var node_obj = node_elems[snippet[j]];
-          node_obj.node.css("background", color);
+
+          node_obj.node
+            .css("background", color)
+            .attr("snippetgroup", i);
+
+          node_obj.container.addClass("snippet-group-" + i);
 
           if (j < snippet.length - 1) {
             var next_idx = snippet[j + 1];
@@ -160,11 +183,19 @@ function while_plugin(socket) {
         const mid2 = node2.position().top + node2.outerHeight(true) / 2.0;
 
         var $edge = $(
-          '<div class="' + edge_settings[side].cls + '"></div>'
+          '<div class="analysis-graph-elem ' + edge_settings[side].cls + '">' +
+          '</div>'
         );
 
-        $edge.addClass("edge-connected-" + i).addClass("edge-connected-" + j);
+        function add_classes($elem) {
+          $elem
+            .addClass("edge-connected-" + i)
+            .addClass("edge-connected-" + j);
+        }
 
+        add_classes($edge);
+        add_classes(node1);
+        add_classes(node2);
 
         const _idx = graph_padding_idx_map[
             edge_settings[side].cnt % graph_padding_range];
@@ -190,7 +221,7 @@ function while_plugin(socket) {
       for (var i = 0; i < graph.length; i++) {
         var node = graph[i];
         var $elem = $(
-          '<div class="analysis-graph-node-container">' +
+          '<div class="analysis-graph-node-container analysis-graph-elem">' +
             '<div class="analysis-graph-node" nodeid="' + i + '">' +
               node.label +
             '</div>' +
@@ -213,14 +244,16 @@ function while_plugin(socket) {
 
         $elem.find(".analysis-graph-node")
           .mouseenter(function() {
-            $content.find(".analysis-graph-edge")
+            $content.find(".analysis-graph-elem")
                 .toggleClass("inactive", true);
             $content.find(".edge-connected-" + this.getAttribute("nodeid"))
-                .toggleClass("inactive", false);
+                .toggleClass("inactive", false)
+                .toggleClass("active", true);
           })
           .mouseleave(function() {
-            $content
-                .find(".analysis-graph-edge").toggleClass("inactive", false);
+            $content.find(".analysis-graph-elem")
+              .toggleClass("inactive", false)
+              .toggleClass("active", false);
           });
       }
 

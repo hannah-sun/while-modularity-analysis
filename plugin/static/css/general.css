@@ -20,6 +20,15 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: background 0.2s;
+}
+
+.snippet-container {
+    transition: opacity 0.2s;
+}
+
+.snippet-container.inactive {
+    opacity: 0.25;
 }
 
 .snippet-container .snippet-node {
@@ -42,7 +51,7 @@
     padding-bottom: 5px;
     border-bottom-left-radius: 0px;
     border-bottom-right-radius: 0px;
-    border-bottom: 1px solid rgb(0, 0, 0, 0.4);
+    border-bottom: 1px solid #ffffff;
 }
 
 .snippet-container.merge-next + .snippet-container .snippet-node {
@@ -65,6 +74,10 @@
 
 .analysis-graph-edge.inactive {
     opacity: 0.15;
+}
+
+.analysis-graph-node-container.active .analysis-graph-node {
+    background: #004d40;
 }
 
 .analysis-graph-edge.left-edge {
