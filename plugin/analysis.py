@@ -270,12 +270,16 @@ def find_snippets(ast):
 
     snippets = list(set(snippets))
 
-    for i in range(len(snippets)):
-        for j in range(i + 1, len(snippets)):
-            x = snippets[i]
-            y = snippets[j]
-            if utils.range_intersects(x.index_range, y.index_range):
-                x.join(y)
+    for node in ast.statements:
+        if _skip_node(node):
+            continue
+
+        snippet = node_to_snippet[node]
+        for _node in node.read_edges:
+            _snippet = node_to_snippet[_node]
+            if utils.range_intersects(
+                    snippet.index_range, _snippet.index_range):
+                snippet.join(_snippet)
 
     snippets = list(set(snippets))
 
