@@ -296,6 +296,8 @@ def find_snippets(ast):
     snippets_result = [
         [node_mapping[x] for x in snippet] for snippet in snippets]
 
+    snippets_result.sort(key=lambda snippet: min(snippet))
+
     return snippets_result
 
 def serialize_snippets_data(ast, snippets, entire_code):
