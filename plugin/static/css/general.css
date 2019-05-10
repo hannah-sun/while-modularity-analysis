@@ -24,7 +24,7 @@
 
 .snippet-container .snippet-node {
     min-width: initial;
-    max-width: 300px;
+    max-width: 400px;
     width: 80%;
     white-space: initial;
     text-align: left;
@@ -56,7 +56,7 @@
     border-color: #555555;
     border-width: 2px;
     margin-top: -1px; /* half of border-width */
-    width: 150px; /* half width of .analysis-graph-node + extra padding */
+    width: 160px; /* half width of .analysis-graph-node + extra padding */
     position: absolute;
     z-index: -1;
     box-sizing: content-box;

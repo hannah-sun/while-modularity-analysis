@@ -1,5 +1,5 @@
-var graph_padding_delta = 50;
-const graph_padding_range = 3;
+var graph_padding_delta = 100;
+const graph_padding_range = 4;
 
 var COLORS = [
   "#ef5350",
@@ -163,6 +163,11 @@ function while_plugin(socket) {
         edge_settings[side].cnt += 1;
       }
 
+      const $tab_content = $content.parents(".tab-content");
+
+      const tab_content_display = $tab_content.css("display");
+      $tab_content.css("display", "").css("visibility", "hidden");
+
       var graph = data.graph;
       for (var i = 0; i < graph.length; i++) {
         var node = graph[i];
@@ -200,6 +205,9 @@ function while_plugin(socket) {
                 .find(".analysis-graph-edge").toggleClass("inactive", false);
           });
       }
+
+      $tab_content.css("display", tab_content_display).css("visibility", "");
+
     }
 
   });
