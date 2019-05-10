@@ -1,14 +1,30 @@
 var graph_padding_delta = 100;
 const graph_padding_range = 4;
+const graph_padding_idx_map = [];
+$(function() {
+  var low = 0;
+  var high = graph_padding_range - 1;
+
+  while (low <= high) {
+    if (low == high) {
+      graph_padding_idx_map.push(low);
+    } else {
+      graph_padding_idx_map.push(low);
+      graph_padding_idx_map.push(high);
+    }
+    low += 1;
+    high -= 1;
+  }
+});
 
 var COLORS = [
-  "#ef5350",
-  "#ab47bc",
-  "#5c6bc0",
   "#29b6f6",
   "#9ccc65",
+  "#5c6bc0",
   "#ffca28",
+  "#ab47bc",
   "#ff7043",
+  "#ef5350",
 ];
 
 $(function() {
@@ -150,7 +166,9 @@ function while_plugin(socket) {
         $edge.addClass("edge-connected-" + i).addClass("edge-connected-" + j);
 
 
-        const padding = ((edge_settings[side].cnt % graph_padding_range + 1) *
+        const _idx = graph_padding_idx_map[
+            edge_settings[side].cnt % graph_padding_range];
+        const padding = ((_idx + 1) *
             (graph_padding_delta / graph_padding_range));
 
         /* in height: -2 is the border width of the edge */
