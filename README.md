@@ -1,1 +1,1 @@
-# while3-redundancy-analysis
+# while3-snippet-analysis
