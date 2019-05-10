@@ -224,6 +224,12 @@ class Snippet(utils.JoinableSet):
             max(self_maximum, maximum),
         )
 
+    def __str__(self):
+        return str(self.data._set)
+
+    def __repr__(self):
+        return self.__str__()
+
     @property
     def index_range(self):
         return self.data.index_range
@@ -270,6 +276,9 @@ def find_snippets(ast):
             snippets.append(snippet)
 
     snippets = list(set(snippets))
+
+    snippets_result = [
+        [node_mapping[x] for x in snippet] for snippet in snippets]
 
     for node in ast.statements:
         if _skip_node(node):

@@ -37,8 +37,12 @@ class JoinableSet:
             self._set = set(*args, **kwargs)
             self._id = JoinableSet._Set._set_cnt
 
+        def _setup(self, parent):
+            self.refs = set([parent])
+
     def __init__(self, *args, **kwargs):
         self.data = self._Set(*args, **kwargs)
+        self.data._setup(self)
 
     def add(self, value):
         self.data._set.add(value)
@@ -47,7 +51,10 @@ class JoinableSet:
         assert isinstance(other, self.__class__)
 
         self.data._set = self.data._set | other.data._set
-        other.data = self.data
+        self.data.refs |= other.data.refs
+
+        for ref in other.data.refs:
+            ref.data = self.data
 
     def __hash__(self):
         return self.data._id
