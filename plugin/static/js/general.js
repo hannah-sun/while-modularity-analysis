@@ -1,6 +1,16 @@
 var graph_padding_delta = 50;
 const graph_padding_range = 3;
 
+var COLORS = [
+  "#ef5350",
+  "#ab47bc",
+  "#5c6bc0",
+  "#29b6f6",
+  "#9ccc65",
+  "#ffca28",
+  "#ff7043",
+];
+
 $(function() {
   /* where 150 is the max-width of the .analysis-graph-edge and
    * 50 is the minimum padding to the side of the tab window */
@@ -24,8 +34,79 @@ $(function() {
 
 function while_plugin(socket) {
 
-  socket.on("testblah", function(data) {
-    console.log(data);
+  socket.on("plugin_analysissnippets", function(data) {
+    const $tab = $("#plugin-snippets-tab");
+
+    $tab
+      .removeClass("loading")
+      .toggleClass("error", data.error);
+
+    $tab.find(".tab-body").removeClass("staging");
+
+    if (!data.error) {
+      const $content = $tab.find("#plugin-tab-content-snippets");
+      $content.empty();
+
+      var node_elems = [];
+
+      var nodes = data.snippet_data.nodes;
+      for (var i = 0; i < nodes.length; i++) {
+        var node = nodes[i];
+        if (node === null) {
+          node_elems.push(null);
+          continue;
+        }
+
+        node = node
+          .replace(/\n /g, "<br>    ")
+          .replace(/\n/g, "<br>")
+          .replace(/ /g, "&nbsp;");
+
+        var $elem = $(
+          '<div class="snippet-container">' +
+            '<div class="snippet-node" nodeid="' + i + '">' +
+              node +
+            '</div>' +
+          '</div>'
+        );
+        $content.append($elem);
+        node_elems.push({
+          container: $elem,
+          node: $elem.find(".snippet-node"),
+        });
+      }
+
+      var snippets = data.snippet_data.snippets;
+      var color_idx = 0;
+      for (var i = 0; i < snippets.length; i++) {
+        var snippet = snippets[i];
+        var color = COLORS[color_idx % COLORS.length];
+        color_idx += 1;
+        snippet.sort(function(a, b) {
+          return parseInt(a) - parseInt(b);
+        })
+        for (var j = 0; j < snippet.length; j++) {
+          var node_obj = node_elems[snippet[j]];
+          node_obj.node.css("background", color);
+
+          if (j < snippet.length - 1) {
+            var next_idx = snippet[j + 1];
+
+            var contiguous = true;
+            for (var k = snippet[j] + 1; k < next_idx; k++) {
+              if (node_elems[k] !== null) {
+                contiguous = false;
+                break;
+              }
+            }
+
+            if (contiguous) {
+              node_obj.container.addClass("merge-next");
+            }
+          }
+        }
+      }
+    }
   });
 
   socket.on("plugin_analysisgraph", function(data) {

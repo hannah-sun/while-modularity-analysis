@@ -22,6 +22,7 @@ class PLUGIN_SETTINGS:
         # html to load in tab windows
         windows = [
             ("Graph", "templates/graph.html"),
+            ("Snippets", "templates/snippets.html"),
         ]
 
         # python function to call so plugin can add Flask views or socket

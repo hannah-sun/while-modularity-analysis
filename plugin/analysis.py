@@ -188,7 +188,7 @@ def serialize_ast_graph(ast):
         node_mapping[node] = len(nodes)
 
         nodes.append({
-            "label": utils.str_label(node),
+            "label": utils.str_label(node, single_line=True),
             "read_edges": [node_mapping[x] for x in node.read_edges],
             "write_edges": [node_mapping[x] for x in node.write_edges],
         })
@@ -230,6 +230,9 @@ class Snippet(utils.JoinableSet):
 def find_snippets(ast):
     """
     Returns list of snippets.
+
+    (index list) list: where index is the index of the ast node in
+                       the `statements` attributes of the root ast node.
     """
 
     snippets = []
@@ -239,12 +242,9 @@ def find_snippets(ast):
     if not isinstance(ast, ast_module.AST.SEQUENCE):
         return snippets
 
-    count = -1
-    for node in ast.statements:
+    for count, node in enumerate(ast.statements):
         if _skip_node(node):
             continue
-
-        count += 1
 
         node_mapping[node] = count
 
@@ -284,10 +284,29 @@ def find_snippets(ast):
 
     return snippets_result
 
+def serialize_snippets_data(ast, snippets):
+    """
+    Returns a serialized JSON representation of the snippet data.
+    """
+
+    nodes = []
+
+    for node in ast.statements:
+        if _skip_node(node):
+            nodes.append(None)
+        else:
+            nodes.append(utils.str_label(node, single_line=False))
+
+    return {
+        "nodes": nodes,
+        "snippets": snippets
+    }
+
 def analyze_ast(emit, ast):
 
     if ast is None:
         emit("plugin_analysisgraph", { "error": True }),
+        emit("plugin_analysissnippets", { "error": True }),
         return
 
     # create a deep copy so we can play around with it
@@ -302,5 +321,8 @@ def analyze_ast(emit, ast):
 
     snippets = find_snippets(ast)
 
-    emit("testblah", snippets)
+    emit("plugin_analysissnippets", {
+        "error": False,
+        "snippet_data": serialize_snippets_data(ast, snippets),
+    })
 

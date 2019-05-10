@@ -3,7 +3,7 @@ import whiletranspiler.transpiler as transpiler
 
 multiple_spaces_pattern = re.compile("[ ]+")
 
-def str_label(ast):
+def str_label(ast, single_line=False):
     """
     Returns a human readable string representing the AST.
     """
@@ -12,9 +12,13 @@ def str_label(ast):
         return ""
 
     string = transpiler.transpile_c.transpile_ast_to_string(ast)
-    return (multiple_spaces_pattern
-            .sub(" ", string.replace("\n", " "))
-            .strip(" \n"))
+
+    if single_line:
+        return (multiple_spaces_pattern
+                .sub(" ", string.replace("\n", " "))
+                .strip(" \n"))
+    else:
+        return multiple_spaces_pattern.sub(" ", string)
 
 class JoinableSet:
     """
