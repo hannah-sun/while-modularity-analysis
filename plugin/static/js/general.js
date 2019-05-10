@@ -1,4 +1,4 @@
-var graph_padding_delta = 100;
+var graph_padding_delta = 200;
 const graph_padding_range = 4;
 const graph_padding_idx_map = [];
 $(function() {
@@ -31,7 +31,7 @@ $(function() {
   /* where 150 is the max-width of the .analysis-graph-edge and
    * 50 is the minimum padding to the side of the tab window */
   graph_padding_delta = Math.min(
-      $("#plugin-graph-tab").width() / 2 - 150 - 50, graph_padding_delta);
+      $("#results-tabs").width() / 2 - 150 - 50, graph_padding_delta);
 
   function toggle_write() {
     $("#plugin-tab-content-graph").toggleClass("hide-left-edges",
@@ -74,7 +74,7 @@ function while_plugin(socket) {
         }
 
         node = node
-          .replace(/\n /g, "<br>    ")
+          .replace(/\t/g, " ")
           .replace(/\n/g, "<br>")
           .replace(/ /g, "&nbsp;");
 

@@ -2,6 +2,7 @@ import re
 import whiletranspiler.transpiler as transpiler
 
 multiple_spaces_pattern = re.compile("[ ]+")
+multiple_tabs_pattern = re.compile("[\t]+")
 
 def str_label(ast, single_line=False, entire_code=None):
     """
