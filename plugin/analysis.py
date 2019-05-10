@@ -1,5 +1,5 @@
 import copy
-from . import ast_utils
+from . import utils
 import whiletranspiler.transpiler.ast as ast_module
 
 def _skip_node(ast_node):
@@ -188,49 +188,40 @@ def serialize_ast_graph(ast):
         node_mapping[node] = len(nodes)
 
         nodes.append({
-            "label": ast_utils.str_label(node),
+            "label": utils.str_label(node),
             "read_edges": [node_mapping[x] for x in node.read_edges],
             "write_edges": [node_mapping[x] for x in node.write_edges],
         })
 
     return nodes
 
-class JoinableSet:
-    """
-    Wrapper for set. 2 JoinableSets instances can be joined so they point to
-    the same union of their underlying sets.
-    """
-
-    class _Set:
-        _set_cnt = 0
-        def __init__(self, *args, **kwargs):
-            JoinableSet._Set._set_cnt += 1
-            self._set = set(*args, **kwargs)
-            self._id = JoinableSet._Set._set_cnt
-
+class Snippet(utils.JoinableSet):
     def __init__(self, *args, **kwargs):
-        self.data = self._Set(*args, **kwargs)
+        index = kwargs.pop("index")
+        super().__init__(*args, **kwargs)
 
-    def add(self, value):
-        self.data._set.add(value)
+        self.data.index_range = (index, index)
 
-    def join(self, other_set):
-        assert isinstance(other_set, JoinableSet)
+    def _include_index(self, index):
+        minimum, maximum = self.data.index_range
+        self.data.index_range = (min(minimum, index), max(maximum, index))
 
-        self.data._set = self.data._set | other_set.data._set
-        other_set.data = self.data
+    def add(self, elem, index, *args, **kwargs):
+        super().add(elem, *args, **kwargs)
 
-    def __hash__(self):
-        return self.data._id
+        if index is not None:
+            self._include_index(index)
 
-    def __eq__(self, other):
-        if isinstance(self, JoinableSet):
-            return hash(self) == hash(other)
-        else:
-            return super().__eq__(other)
+    def join(self, other):
+        assert isinstance(other, self.__class__)
+        minimum, maximum = other.data.index_range
+        self_minimum, self_maximum = self.data.index_range
+        super().join(other)
 
-    def __iter__(self):
-        return iter(self.data._set)
+        self.data.index_range = (
+            min(self_minimum, minimum),
+            max(self_maximum, maximum),
+        )
 
 def find_snippets(ast):
     """
@@ -244,13 +235,14 @@ def find_snippets(ast):
     if not isinstance(ast, ast_module.AST.SEQUENCE):
         return snippets
 
-    count = 0
+    count = -1
     for node in ast.statements:
         if _skip_node(node):
             continue
 
-        node_mapping[node] = count
         count += 1
+
+        node_mapping[node] = count
 
         prev_snippet = None
         for _node in node.write_edges:
@@ -259,7 +251,7 @@ def find_snippets(ast):
             assert _node in node_to_snippet
 
             snippet = node_to_snippet[_node]
-            snippet.add(node)
+            snippet.add(node, index=count)
             node_to_snippet[node] = snippet
 
             if prev_snippet is not None:
@@ -268,7 +260,7 @@ def find_snippets(ast):
             prev_snippet = snippet
 
         if prev_snippet is None:
-            snippet = JoinableSet([node])
+            snippet = Snippet([node], index=count)
             node_to_snippet[node] = snippet
             snippets.append(snippet)
 
