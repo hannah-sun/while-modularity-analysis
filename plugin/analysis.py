@@ -2,6 +2,9 @@ import copy
 from . import ast_utils
 import whiletranspiler.transpiler.ast as ast_module
 
+def _skip_node(ast_node):
+    return isinstance(ast_node, ast_module.AST.COMMENT)
+
 def create_rw_sets(ast, variable_mapping):
     """
     Adds attributes `read_edges` and `write_edges` to all nodes in AST.
@@ -179,7 +182,7 @@ def serialize_ast_graph(ast):
         return nodes
 
     for node in ast.statements:
-        if isinstance(node, ast_module.AST.COMMENT):
+        if _skip_node(node):
             continue
 
         node_mapping[node] = len(nodes)
@@ -191,6 +194,89 @@ def serialize_ast_graph(ast):
         })
 
     return nodes
+
+class JoinableSet:
+    """
+    Wrapper for set. 2 JoinableSets instances can be joined so they point to
+    the same union of their underlying sets.
+    """
+
+    class _Set:
+        _set_cnt = 0
+        def __init__(self, *args, **kwargs):
+            JoinableSet._Set._set_cnt += 1
+            self._set = set(*args, **kwargs)
+            self._id = JoinableSet._Set._set_cnt
+
+    def __init__(self, *args, **kwargs):
+        self.data = self._Set(*args, **kwargs)
+
+    def add(self, value):
+        self.data._set.add(value)
+
+    def join(self, other_set):
+        assert isinstance(other_set, JoinableSet)
+
+        self.data._set = self.data._set | other_set.data._set
+        other_set.data = self.data
+
+    def __hash__(self):
+        return self.data._id
+
+    def __eq__(self, other):
+        if isinstance(self, JoinableSet):
+            return hash(self) == hash(other)
+        else:
+            return super().__eq__(other)
+
+    def __iter__(self):
+        return iter(self.data._set)
+
+def find_snippets(ast):
+    """
+    Returns list of snippets.
+    """
+
+    snippets = []
+    node_to_snippet = {}
+    node_mapping = {}
+
+    if not isinstance(ast, ast_module.AST.SEQUENCE):
+        return snippets
+
+    count = 0
+    for node in ast.statements:
+        if _skip_node(node):
+            continue
+
+        node_mapping[node] = count
+        count += 1
+
+        prev_snippet = None
+        for _node in node.write_edges:
+            # _node should already be in mapping because the edges point
+            # up the sequence
+            assert _node in node_to_snippet
+
+            snippet = node_to_snippet[_node]
+            snippet.add(node)
+            node_to_snippet[node] = snippet
+
+            if prev_snippet is not None:
+                snippet.join(prev_snippet)
+
+            prev_snippet = snippet
+
+        if prev_snippet is None:
+            snippet = JoinableSet([node])
+            node_to_snippet[node] = snippet
+            snippets.append(snippet)
+
+    snippets = list(set(snippets))
+    snippets_result = [
+        [node_mapping[x] for x in snippet] for snippet in snippets]
+
+    return snippets_result
 
 def analyze_ast(emit, ast):
 
@@ -206,5 +292,9 @@ def analyze_ast(emit, ast):
     emit("plugin_analysisgraph", {
         "error": False,
         "graph": serialize_ast_graph(ast)
-    }),
+    })
+
+    snippets = find_snippets(ast)
+
+    emit("testblah", snippets)
 
