@@ -1,0 +1,2 @@
+recursive-include plugin/templates *
+recursive-include plugin/static *
