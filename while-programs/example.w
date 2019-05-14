@@ -6,7 +6,7 @@ while ( x > 0 ) {
 }
 x = 7;
 sum_3_to_7 = 0;
-while ( x => 3 ) {
+while ( x >= 3 ) {
 	sum_3_to_7 = sum_3_to_7 + x;
 	x = x - 1;
 }
