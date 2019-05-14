@@ -1,7 +1,6 @@
 n = 21;
 
 // finds 21st Fibonacci number (1st number is 0, 2nd is 1, and so on)
-
 n1 = 0;
 n2 = 1;
 
@@ -29,7 +28,6 @@ if (n > 2) {
 n = 25;
 
 // finds 25th Fibonacci number (1st number is 0, 2nd is 1, and so on)
-
 n_1 = 0;
 n_2 = 1;
 n_fib = 0;
@@ -44,4 +42,3 @@ while (count < n) {
 }
 
 print(n_fib);
-
